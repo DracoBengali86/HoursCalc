@@ -186,7 +186,7 @@ celerybeat-schedule
 .env
 .venv
 env/
-*venv/
+venv/
 ENV/
 env.bak/
 venv.bak/
@@ -238,6 +238,7 @@ $RECYCLE.BIN/
 
 #Personally Added
 old/
+HoursCalcVenv/
 TimeSheetReport*
 YearlyPay*
 Pay*
