@@ -3,6 +3,7 @@ import os
 # from openpyxl import load_workbook
 # from openpyxl import Workbook
 import openpyxl
+from datetime import datetime
 
 mytasks = []
 ignoredtasks = []
@@ -10,8 +11,9 @@ myyears = []
 daysinyear = []
 weeksinyear = []
 
-hourcoll = ['G', 'I', 'K', 'M', 'O', 'Q', 'S']
-daterow = str(8)
+daterow = str(2)
+taskrow = 5  # row that task codes start at
+taskcolumn = 'D'
 
 with open('IgnoredTaskCodes.txt', 'r') as f:  #opening this way closes the file when finished, so no f.close required
     ignoredtasks = f.read().splitlines()
@@ -25,26 +27,40 @@ print(cwd)
 # os.chdir("/path/to/folder")
 # os.listdir('.')
 
-wb = openpyxl.load_workbook('TimeSheetReportSingleUserGUID.xlsx')
+print("Loading workbook (this takes time, please be patient")
+wb = openpyxl.load_workbook('TimeSheetReportYearly.xlsx')
 # print(wb2.sheetnames)
 # mylength = len(wb2.sheetnames)
 # print(mylength)
 
 mysheets = wb.sheetnames
 
+hourcolls = [[] for i in mysheets]
+
 # get tasks from timesheet report
 for i in range(len(mysheets)):
-    # print(mysheets[i])
-    sheet = wb[mysheets[i]]
-    # print(sheet['E9'].value)
-    j = 9
+    sheet = wb.worksheets[i]
+    sheetname = wb.sheetnames[i]
+
+    # create hour column for each sheet
+    print("Finding hour columns for sheet: " + sheetname)
+    for m in range(1,sheet.max_column-2):
+        if sheet.cell(row=4,column=m).value == "Use":
+            colname = openpyxl.utils.cell.get_column_letter(m)
+            hourcolls[i].append(colname)
+
+    print("Finding tasks and years for sheet: " + sheetname)
+    j = taskrow
     while True:
-        cell = 'E' + str(j)
+        # Task Code column is hard coded
+        cell = taskcolumn + str(j)
         task = sheet[cell].value
-        if task == 'Totals:':
-            for k in range(len(hourcoll)):
-                datecell = hourcoll[k] + daterow
+        if task is None:
+            for k in range(len(hourcolls[i])):
+                datecell = hourcolls[i][k] + daterow
                 mydate = sheet[datecell].value
+                if type(mydate) is datetime:
+                    mydate = mydate.strftime("%d/%m/%Y")
                 year = mydate[-2:]
                 if year not in myyears:
                     myyears.append(year)
@@ -76,25 +92,29 @@ weeksinyear = [0] * len(myyears)
 #printhours()
 
 for i in range(len(mysheets)):
-    sheet = wb[mysheets[i]]
-    j = 9
+    sheet = wb.worksheets[i]
+    sheetname = wb.sheetnames[i]
+    print("Finding task hours for sheet: " + sheetname)
+    j = taskrow
     while True:
-        taskcell = 'E' + str(j)
+        taskcell = taskcolumn + str(j)
         task = sheet[taskcell].value
-        if task == 'Totals:':
+        if task is None:
             break
         taskindex = mytasks.index(task)
-        for k in range(len(hourcoll)):
-            datecell = hourcoll[k] + daterow
+        for k in range(len(hourcolls[i])):
+            datecell = hourcolls[i][k] + daterow
             mydate = sheet[datecell].value
+            if type(mydate) is datetime:
+                mydate = mydate.strftime("%d/%m/%Y")
             year = mydate[-2:]
             yearindex = myyears.index(year)
-            if j == 9:
+            if j == taskrow:
                 daysinyear[yearindex] += 1
 #            print(mydate)
 #            if year not in myyears:
 #                myyears.append(year)
-            hourcell = hourcoll[k] + str(j)
+            hourcell = hourcolls[i][k] + str(j)
 #            print(sheet[hourcell].value)
             if sheet[hourcell].value != None:
 #                taskhours[taskindex] += sheet[hourcell].value
