@@ -238,5 +238,6 @@ $RECYCLE.BIN/
 
 #Personally Added
 TimeSheetReport*
-*Pay*
+YearlyPay*
+Pay*
 !/.gitignore
