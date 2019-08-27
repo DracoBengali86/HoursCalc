@@ -1,0 +1,2 @@
+Enter each year on a new line as Year,Pay (EX 2000,50000)-remove "_Example" from file name
+2019,10000
