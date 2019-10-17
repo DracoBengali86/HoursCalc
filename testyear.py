@@ -27,7 +27,7 @@ print(cwd)
 # os.chdir("/path/to/folder")
 # os.listdir('.')
 
-print("Loading workbook (this takes time, please be patient")
+print("Loading workbook (this takes time, please be patient)")
 wb = openpyxl.load_workbook('TimeSheetReportYearly.xlsx')
 # print(wb2.sheetnames)
 # mylength = len(wb2.sheetnames)
@@ -147,6 +147,10 @@ for i in range(len(mytasks)):
             ignoredbyyear[j] += myhours[j][i]
     print(mytasks[i] + ' ' + str(taskhours[i]))
 
+weeksworked = 0
+for i in range(len(myyears)):
+    weeksinyear[i] = round(daysinyear[i]/7)
+    weeksworked += weeksinyear[i]
 
 def hoursformat(hours):
     if hours >= 10000:
@@ -168,14 +172,16 @@ totalheader = '                Year:'
 totalline = 'Total Hours:  ' + hoursformat(totalhours)
 ignoredline = 'Ignored Hours:' + hoursformat(ignoredhours)
 workedline = 'Working Hours:' + hoursformat(workedhours)
-averageline = 'Hours / Week: ' + hoursformat(workedhours/(52*len(myyears)))
+weeksline = 'Weeks Worked: ' + hoursformat(weeksworked)
+# averageline = 'Hours / Week: ' + hoursformat(workedhours/(52*len(myyears)))
+averageline = 'Hours / Week: ' + hoursformat(workedhours/weeksworked)
 
 for i in range(len(myyears)):
-    weeksinyear[i] = round(daysinyear[i]/7)
     totalheader += '       ' + myyears[i]
     totalline += hoursformat(totalbyyear[i])
     ignoredline += hoursformat(ignoredbyyear[i])
     workedline += hoursformat(totalbyyear[i] - ignoredbyyear[i])
+    weeksline += hoursformat(weeksinyear[i])
     if weeksinyear[i] > 0:
         averageline += hoursformat((totalbyyear[i] - ignoredbyyear[i])/weeksinyear[i])
 
