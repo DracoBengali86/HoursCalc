@@ -166,13 +166,27 @@ def hoursformat(hours):
     return formatted
 
 
+def weeksformat(weeks):
+    if weeks >= 10000:
+        formatted = '  ' + str(weeks) + '  '
+    elif weeks >= 1000:
+        formatted = '   ' + str(weeks) + '  '
+    elif weeks >= 100:
+        formatted = '    ' + str(weeks) + '  '
+    elif weeks >= 10:
+        formatted = '     ' + str(weeks) + '  '
+    else:
+        formatted = '      ' + str(weeks) + '  '
+    return formatted
+
+
 workedhours = totalhours - ignoredhours
 
 totalheader = '                Year:'
 totalline = 'Total Hours:  ' + hoursformat(totalhours)
 ignoredline = 'Ignored Hours:' + hoursformat(ignoredhours)
 workedline = 'Working Hours:' + hoursformat(workedhours)
-weeksline = 'Weeks Worked: ' + hoursformat(weeksworked)
+weeksline = 'Weeks Worked: ' + weeksformat(weeksworked)
 # averageline = 'Hours / Week: ' + hoursformat(workedhours/(52*len(myyears)))
 averageline = 'Hours / Week: ' + hoursformat(workedhours/weeksworked)
 
@@ -181,7 +195,7 @@ for i in range(len(myyears)):
     totalline += hoursformat(totalbyyear[i])
     ignoredline += hoursformat(ignoredbyyear[i])
     workedline += hoursformat(totalbyyear[i] - ignoredbyyear[i])
-    weeksline += hoursformat(weeksinyear[i])
+    weeksline += weeksformat(weeksinyear[i])
     if weeksinyear[i] > 0:
         averageline += hoursformat((totalbyyear[i] - ignoredbyyear[i])/weeksinyear[i])
 
@@ -192,6 +206,7 @@ print('\r\n' + totalheader)
 print(totalline)
 print(ignoredline)
 print(workedline)
+print(weeksline)
 print(averageline)
 
 print('\r\n')
