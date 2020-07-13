@@ -1,7 +1,4 @@
-# import openpyxl
 import os
-# from openpyxl import load_workbook
-# from openpyxl import Workbook
 import openpyxl
 from datetime import datetime
 
@@ -27,13 +24,39 @@ print(cwd)
 # os.chdir("/path/to/folder")
 # os.listdir('.')
 
-print("Loading workbook (this takes time, please be patient)")
-wb = openpyxl.load_workbook('TimeSheetReportYearly.xlsx')
-# print(wb2.sheetnames)
-# mylength = len(wb2.sheetnames)
-# print(mylength)
+print("Loading workbook")
+# quickload a temporary workbook
+wbtemp = openpyxl.load_workbook('TimeSheetReportYearly.xlsx', read_only=True)
 
-mysheets = wb.sheetnames
+mysheets = wbtemp.sheetnames
+sheet_total = len(mysheets)
+sheet_count = 0
+
+
+# print out a loading percentage as sheets are loaded.
+print('Loaded: {:.0%}'.format(sheet_count / sheet_total))
+
+# create workbook that will be used in rest of program
+wb = openpyxl.Workbook()
+wb.remove_sheet(wb.active)  # remove initial sheet
+
+for sheet in mysheets:
+    sheet_count += 1
+    wb.create_sheet(sheet)
+    ws = wb.get_sheet_by_name(sheet)
+    wstemp = wbtemp.get_sheet_by_name(sheet)
+
+    # iterate through rows in temp sheet and copy the cells into the working sheet
+    row_count = 1
+    for row in wstemp.values:
+        column_count = 1
+        for value in row:
+            ws.cell(row=row_count, column=column_count, value=value)
+            column_count += 1
+        row_count += 1
+
+    print('Loaded: {:.0%}'.format(sheet_count / sheet_total))
+
 
 hourcolls = [[] for i in mysheets]
 
@@ -187,7 +210,6 @@ totalline = 'Total Hours:  ' + hoursformat(totalhours)
 ignoredline = 'Ignored Hours:' + hoursformat(ignoredhours)
 workedline = 'Working Hours:' + hoursformat(workedhours)
 weeksline = 'Weeks Worked: ' + weeksformat(weeksworked)
-# averageline = 'Hours / Week: ' + hoursformat(workedhours/(52*len(myyears)))
 averageline = 'Hours / Week: ' + hoursformat(workedhours/weeksworked)
 
 for i in range(len(myyears)):
@@ -217,9 +239,6 @@ while action != "N":
         print("Please choose [Y]es or [N]o")
         continue
     if action == "Y":
-        #mypay = int(input("How much were you paid? $"))
-        #print('\r\nTotal $/hr:  ' + '{:.2f}'.format(mypay/totalhours))
-        #print('Worked $/hr: ' + '{:.2f}'.format(mypay/workedhours))
         break
     else:
         exit()
@@ -282,8 +301,5 @@ print('\r\n' + perhourheader)
 print(perhourtotalline)
 print(perhourworkedline)
 
-#work on getting pay enterable from text file
-#maybe csv with year,pay (ignore $ sign? or require it not to be there?)
-#could just loop with every other line being year/pay
 #ask if user wants to import, if file doesn't exist create blank with "example" entry
 #verify/wait for user to say they've filled it in
