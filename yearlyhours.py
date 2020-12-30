@@ -1,9 +1,10 @@
 import os
+
 import openpyxl
 from datetime import datetime
 
+file_name = None
 mytasks = []
-ignoredtasks = []
 myyears = []
 daysinyear = []
 weeksinyear = []
@@ -12,7 +13,7 @@ daterow = str(2)
 taskrow = 5  # row that task codes start at
 taskcolumn = 'D'
 
-with open('IgnoredTaskCodes.txt', 'r') as f:  #opening this way closes the file when finished, so no f.close required
+with open('IgnoredTaskCodes.txt', 'r') as f:  # opening this way closes the file when finished, so no f.close required
     ignoredtasks = f.read().splitlines()
 
 ignoredtasks.sort()
@@ -21,11 +22,9 @@ print(ignoredtasks)
 
 cwd = os.getcwd()
 print(cwd)
-# os.chdir("/path/to/folder")
-# os.listdir('.')
 
 print("Loading workbook")
-# quickload a temporary workbook
+# quick-load a temporary workbook
 wbtemp = openpyxl.load_workbook('TimeSheetReportYearly.xlsx', read_only=True)
 
 mysheets = wbtemp.sheetnames
@@ -67,8 +66,8 @@ for i in range(len(mysheets)):
 
     # create hour column for each sheet
     print("Finding hour columns for sheet: " + sheetname)
-    for m in range(1,sheet.max_column-2):
-        if sheet.cell(row=4,column=m).value == "Use":
+    for m in range(1, sheet.max_column-2):
+        if sheet.cell(row=4, column=m).value == "Use":
             colname = openpyxl.utils.cell.get_column_letter(m)
             hourcolls[i].append(colname)
 
@@ -101,7 +100,7 @@ print('\r\nFound the Following Years:')
 print(myyears)
 
 # get hours
-taskhours = [0] * len(mytasks)                                  #this may be able to be deleted - investigate
+taskhours = [0] * len(mytasks)                                # this may be able to be deleted - investigate
 myhours = [[0] * len(mytasks) for i in myyears]
 daysinyear = [0] * len(myyears)
 weeksinyear = [0] * len(myyears)
@@ -154,7 +153,8 @@ for i in range(len(myyears)):
     weeksinyear[i] = round(daysinyear[i]/7)
     weeksworked += weeksinyear[i]
 
-def hoursformat(hours):
+
+def hours_format(hours):
     if hours >= 10000:
         formatted = ' ' + '{:.2f}'.format(hours)
     elif hours >= 1000:
@@ -168,7 +168,7 @@ def hoursformat(hours):
     return formatted
 
 
-def weeksformat(weeks):
+def weeks_format(weeks):
     if weeks >= 10000:
         formatted = '  ' + str(weeks) + '  '
     elif weeks >= 1000:
@@ -185,20 +185,20 @@ def weeksformat(weeks):
 workedhours = totalhours - ignoredhours
 
 totalheader = '                Year:'
-totalline = 'Total Hours:  ' + hoursformat(totalhours)
-ignoredline = 'Ignored Hours:' + hoursformat(ignoredhours)
-workedline = 'Working Hours:' + hoursformat(workedhours)
-weeksline = 'Weeks Worked: ' + weeksformat(weeksworked)
-averageline = 'Hours / Week: ' + hoursformat(workedhours/weeksworked)
+totalline = 'Total Hours:  ' + hours_format(totalhours)
+ignoredline = 'Ignored Hours:' + hours_format(ignoredhours)
+workedline = 'Working Hours:' + hours_format(workedhours)
+weeksline = 'Weeks Worked: ' + weeks_format(weeksworked)
+averageline = 'Hours / Week: ' + hours_format(workedhours / weeksworked)
 
 for i in range(len(myyears)):
     totalheader += '       ' + myyears[i]
-    totalline += hoursformat(totalbyyear[i])
-    ignoredline += hoursformat(ignoredbyyear[i])
-    workedline += hoursformat(totalbyyear[i] - ignoredbyyear[i])
-    weeksline += weeksformat(weeksinyear[i])
+    totalline += hours_format(totalbyyear[i])
+    ignoredline += hours_format(ignoredbyyear[i])
+    workedline += hours_format(totalbyyear[i] - ignoredbyyear[i])
+    weeksline += weeks_format(weeksinyear[i])
     if weeksinyear[i] > 0:
-        averageline += hoursformat((totalbyyear[i] - ignoredbyyear[i])/weeksinyear[i])
+        averageline += hours_format((totalbyyear[i] - ignoredbyyear[i]) / weeksinyear[i])
 
 print('weeks in year')
 print(weeksinyear)
@@ -228,7 +228,7 @@ rerun = "Z"
 while rerun != "N":
     input_action = "Z"
     while input_action != "N":
-        input_action = input("Would you like to [I]mport your yearly pay or [M]anually enter it? [I/M] ").upper()
+        input_action = input("Would you like to [I]mport your yearly pay or [M]anually enter it? ").upper()
         if input_action not in "IM" or len(action) != 1:
             print("Please choose [I]port or [M]anual entry")
             continue
@@ -240,7 +240,7 @@ while rerun != "N":
                     print("Please choose [Y]es or [N]o")
                     continue
                 if file_action == "Y":
-                    if os.path.isfile('YearlyPayImport.txt'):  #consider adding " and os.access(PATH, os.R_OK)"
+                    if os.path.isfile('YearlyPayImport.txt'):  # consider adding " and os.access(PATH, os.R_OK)"
                         print('Importing file ' + cwd + '\\YearlyPayImport.txt')
                         file_name = "YearlyPayImport.txt"
                         break
@@ -275,7 +275,7 @@ while rerun != "N":
         else:
             print('Enter how much you were paid each year (enter 0 to skip that year)')
             for i in range(len(myyears)):
-                myyearlypay[i] = int(input('How much were you paid in \'' + myyears[i] + '? $').replace(',',''))
+                myyearlypay[i] = int(input('How much were you paid in \'' + myyears[i] + '? $').replace(',', ''))
             break
 
     adjustedtotalhours = 0
@@ -286,8 +286,8 @@ while rerun != "N":
             adjustedignoredhours += ignoredbyyear[i]
 
     perhourheader = '                Year:'
-    perhourtotalline = 'Total $/hr:   ' + hoursformat(sum(myyearlypay) / adjustedtotalhours)
-    perhourworkedline = 'Worked $/hr:  ' + hoursformat(sum(myyearlypay) / (adjustedtotalhours - adjustedignoredhours))
+    perhourtotalline = 'Total $/hr:   ' + hours_format(sum(myyearlypay) / adjustedtotalhours)
+    perhourworkedline = 'Worked $/hr:  ' + hours_format(sum(myyearlypay) / (adjustedtotalhours - adjustedignoredhours))
 
     for i in range(len(myyears)):
         perhourheader += '       ' + myyears[i]
@@ -295,8 +295,8 @@ while rerun != "N":
             perhourtotalline += '         '
             perhourworkedline += '         '
         else:
-            perhourtotalline += hoursformat(myyearlypay[i] / totalbyyear[i])
-            perhourworkedline += hoursformat(myyearlypay[i] / (totalbyyear[i] - ignoredbyyear[i]))
+            perhourtotalline += hours_format(myyearlypay[i] / totalbyyear[i])
+            perhourworkedline += hours_format(myyearlypay[i] / (totalbyyear[i] - ignoredbyyear[i]))
 
     print('\r\n' + perhourheader)
     print(perhourtotalline)
