@@ -226,19 +226,20 @@ myyearlypay = [0] * len(myyears)
 
 rerun = "Z"
 while rerun != "N":
-    action = "Z"
-    while action != "N":
-        action = input("Would you like to [I]mport your yearly pay or [M]anually enter it? [I/M] ").upper()
-        if action not in "IM" or len(action) != 1:
+    input_action = "Z"
+    while input_action != "N":
+        input_action = input("Would you like to [I]mport your yearly pay or [M]anually enter it? [I/M] ").upper()
+        if input_action not in "IM" or len(action) != 1:
             print("Please choose [I]port or [M]anual entry")
             continue
-        if action == "I":
-            while action != "N":
-                action = input("Use default file (YearlyPayImport.txt)? [Y/N] ").upper()
-                if action not in "YN" or len(action) != 1:
+        if input_action == "I":
+            file_action = "Z"
+            while file_action != "N":
+                file_action = input("Use default file (YearlyPayImport.txt)? [Y/N] ").upper()
+                if file_action not in "YN" or len(action) != 1:
                     print("Please choose [Y]es or [N]o")
                     continue
-                if action == "Y":
+                if file_action == "Y":
                     if os.path.isfile('YearlyPayImport.txt'):  #consider adding " and os.access(PATH, os.R_OK)"
                         print('Importing file ' + cwd + '\\YearlyPayImport.txt')
                         file_name = "YearlyPayImport.txt"
@@ -249,14 +250,16 @@ while rerun != "N":
                             f.write('Enter each year on a new line as Year,Pay (EX 2000,50000)')
                             f.write('')
                         input('Edit the Import file, then press Enter.')
-                if action == "N":
-                    file_name = input("Enter name of file to use")
+                if file_action == "N":
+                    file_name = input("Enter name of file to use: ")
+                    if file_name[-4:].upper() != ".TXT":
+                        file_name = file_name + ".txt"
                     if os.path.isfile(file_name):
                         break
                     else:
                         print("File not found")
                         # reset action to allow while loop to ask about file again
-                        action == "Z"
+                        file_action = "Z"
 
             with open(file_name, 'r') as f:
                 next(f)
