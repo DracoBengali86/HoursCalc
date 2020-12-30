@@ -106,14 +106,6 @@ myhours = [[0] * len(mytasks) for i in myyears]
 daysinyear = [0] * len(myyears)
 weeksinyear = [0] * len(myyears)
 
-#def printhours():
-#    for row in myhours:
-#        for elem in row:
-#            print(elem, end=' ')
-#        print()
-
-#printhours()
-
 for i in range(len(mysheets)):
     sheet = wb.worksheets[i]
     sheetname = wb.sheetnames[i]
@@ -134,24 +126,11 @@ for i in range(len(mysheets)):
             yearindex = myyears.index(year)
             if j == taskrow:
                 daysinyear[yearindex] += 1
-#            print(mydate)
-#            if year not in myyears:
-#                myyears.append(year)
             hourcell = hourcolls[i][k] + str(j)
-#            print(sheet[hourcell].value)
-            if sheet[hourcell].value != None:
-#                taskhours[taskindex] += sheet[hourcell].value
+            if sheet[hourcell].value is not None:
                 myhours[yearindex][taskindex] += sheet[hourcell].value
-#                print('partial array')
-#                printhours()
 
         j += 1
-
-#print('filled array')
-#printhours()
-
-#print('days in year')
-#print(daysinyear)
 
 totalhours = 0
 ignoredhours = 0
@@ -234,7 +213,7 @@ print(averageline)
 print('\r\n')
 action = "Z"
 while action != "N":
-    action = input("Do you want to calculate $/hr? [Y/N]").upper()
+    action = input("Do you want to calculate $/hr? [Y/N] ").upper()
     if action not in "YN" or len(action) != 1:
         print("Please choose [Y]es or [N]o")
         continue
@@ -245,61 +224,83 @@ while action != "N":
 
 myyearlypay = [0] * len(myyears)
 
-action = "Z"
-while action != "N":
-    action = input("Would you like to import your yearly pay? [Y/N]").upper()
-    if action not in "YN" or len(action) != 1:
-        print("Please choose [Y]es or [N]o")
-        continue
-    if action == "Y":
-        if os.path.isfile('YearlyPayImport.txt'):  #consider adding " and os.access(PATH, os.R_OK)"
-            print('Importing file ' + cwd + '\\YearlyPayImport.txt')
+rerun = "Z"
+while rerun != "N":
+    action = "Z"
+    while action != "N":
+        action = input("Would you like to [I]mport your yearly pay or [M]anually enter it? [I/M] ").upper()
+        if action not in "IM" or len(action) != 1:
+            print("Please choose [I]port or [M]anual entry")
+            continue
+        if action == "I":
+            while action != "N":
+                action = input("Use default file (YearlyPayImport.txt)? [Y/N] ").upper()
+                if action not in "YN" or len(action) != 1:
+                    print("Please choose [Y]es or [N]o")
+                    continue
+                if action == "Y":
+                    if os.path.isfile('YearlyPayImport.txt'):  #consider adding " and os.access(PATH, os.R_OK)"
+                        print('Importing file ' + cwd + '\\YearlyPayImport.txt')
+                        file_name = "YearlyPayImport.txt"
+                        break
+                    else:
+                        print('Import file doesn\'t exist, creating file: ' + cwd + '\\YearlyPayImport.txt')
+                        with open('YearlyPayImport.txt', 'w') as f:
+                            f.write('Enter each year on a new line as Year,Pay (EX 2000,50000)')
+                            f.write('')
+                        input('Edit the Import file, then press Enter.')
+                if action == "N":
+                    file_name = input("Enter name of file to use")
+                    if os.path.isfile(file_name):
+                        break
+                    else:
+                        print("File not found")
+                        # reset action to allow while loop to ask about file again
+                        action == "Z"
+
+            with open(file_name, 'r') as f:
+                next(f)
+                for line in f:
+                    yearstr, paystr = line.split(',')
+                    year = yearstr[-2:]
+                    if year not in myyears:
+                        print('No matching year found: ' + yearstr)
+                    else:
+                        yearindex = myyears.index(year)
+                        myyearlypay[yearindex] = int(paystr)
+            break
         else:
-            print('Import file doesn\'t exist, creating file: ' + cwd + '\\YearlyPayImport.txt')
-            with open('YearlyPayImport.txt', 'w') as f:
-                f.write('Enter each year on a new line as Year,Pay (EX 2000,50000)')
-                f.write('')
-            input('Edit the Import file, then press Enter.')
-        with open('YearlyPayImport.txt', 'r') as f:
-            next(f)
-            for line in f:
-                yearstr, paystr = line.split(',')
-                year = yearstr[-2:]
-                if year not in myyears:
-                    print('No matching year found: ' + yearstr)
-                else:
-                    yearindex = myyears.index(year)
-                    myyearlypay[yearindex] = int(paystr)
-        break
-    else:
-        print('Enter how much you were paid each year (enter 0 to skip)')
-        for i in range(len(myyears)):
-            myyearlypay[i] = int(input('How much were you paid in \'' + myyears[i] + '? $'))
-        break
+            print('Enter how much you were paid each year (enter 0 to skip that year)')
+            for i in range(len(myyears)):
+                myyearlypay[i] = int(input('How much were you paid in \'' + myyears[i] + '? $').replace(',',''))
+            break
 
-adjustedtotalhours = 0
-adjustedignoredhours = 0
-for i in range(len(myyears)):
-    if myyearlypay[i] != 0:
-        adjustedtotalhours += totalbyyear[i]
-        adjustedignoredhours += ignoredbyyear[i]
+    adjustedtotalhours = 0
+    adjustedignoredhours = 0
+    for i in range(len(myyears)):
+        if myyearlypay[i] != 0:
+            adjustedtotalhours += totalbyyear[i]
+            adjustedignoredhours += ignoredbyyear[i]
 
-perhourheader = '                Year:'
-perhourtotalline = 'Total $/hr:   ' + hoursformat(sum(myyearlypay) / adjustedtotalhours)
-perhourworkedline = 'Worked $/hr:  ' + hoursformat(sum(myyearlypay) / (adjustedtotalhours - adjustedignoredhours))
+    perhourheader = '                Year:'
+    perhourtotalline = 'Total $/hr:   ' + hoursformat(sum(myyearlypay) / adjustedtotalhours)
+    perhourworkedline = 'Worked $/hr:  ' + hoursformat(sum(myyearlypay) / (adjustedtotalhours - adjustedignoredhours))
 
-for i in range(len(myyears)):
-    perhourheader += '       ' + myyears[i]
-    if myyearlypay[i] == 0:
-        perhourtotalline += '         '
-        perhourworkedline += '         '
-    else:
-        perhourtotalline += hoursformat(myyearlypay[i] / totalbyyear[i])
-        perhourworkedline += hoursformat(myyearlypay[i] / (totalbyyear[i] - ignoredbyyear[i]))
+    for i in range(len(myyears)):
+        perhourheader += '       ' + myyears[i]
+        if myyearlypay[i] == 0:
+            perhourtotalline += '         '
+            perhourworkedline += '         '
+        else:
+            perhourtotalline += hoursformat(myyearlypay[i] / totalbyyear[i])
+            perhourworkedline += hoursformat(myyearlypay[i] / (totalbyyear[i] - ignoredbyyear[i]))
 
-print('\r\n' + perhourheader)
-print(perhourtotalline)
-print(perhourworkedline)
+    print('\r\n' + perhourheader)
+    print(perhourtotalline)
+    print(perhourworkedline)
 
-#ask if user wants to import, if file doesn't exist create blank with "example" entry
-#verify/wait for user to say they've filled it in
+    print('\r\nTo re-import your TimeSheet, restart the application')
+
+    rerun = "Z"
+    while rerun not in "YN":
+        rerun = input("Would you like to import a different pay file? [Y/N] ").upper()
