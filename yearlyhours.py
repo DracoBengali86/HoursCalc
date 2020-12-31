@@ -24,6 +24,7 @@ cwd = os.getcwd()
 print(cwd)
 
 print("Loading workbook")
+print('TimeSheetReportYearly.xlsx')
 # quick-load a temporary workbook
 wbtemp = openpyxl.load_workbook('TimeSheetReportYearly.xlsx', read_only=True)
 
