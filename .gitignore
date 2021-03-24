@@ -238,8 +238,8 @@ $RECYCLE.BIN/
 
 #Personally Added
 old/
-HoursCalcVenv/
 TimeSheetReport*
 YearlyPay*
 Pay*
 !/.gitignore
+temp

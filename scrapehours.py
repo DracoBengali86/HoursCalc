@@ -1,15 +1,29 @@
+import os
+import pandas as pd
+
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+
 import openpyxl
-import pandas as pd
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
-start_date = '1/1/20'
-end_date = '12/31/20'
+from datetime import datetime, timedelta
+
+# TODO: Create function to create string from datetime in d/m/yy with no zero padding
+# TODO: Create function to find previous Sunday and return formatted date string (possibly make selectable day)
+today = datetime.now()
+year = str(today.year)
+offset = today.isoweekday()
+sunday = today - timedelta(days=offset)
+
+# Start date must be formatted d/m/yy, not dd/mm/yyyy it is used to compare to the date on the spreadsheet
+# and that date has no zero padding and only a two digit year. End date only has to exclude time info (no HH:MM:SS.SS)
+start_date = '1/1/' + year[-2:]
+end_date = sunday.strftime("%m/%d/%y")
 
 key_control = u'\ue009'
 key_backspace = u'\ue003'
@@ -76,13 +90,16 @@ def main():
     print(df.head())
     print("\n\nNon Head")
     print(df)
-    df.to_excel(r'C:\Users\ahummel\PycharmProjects\testHoursScrape\test.xlsx', header=True)
+    df.to_excel(r'temp.xlsx', header=True)
 
     driver.quit()
 
     # modify_spreadsheet(df)
-    wb = openpyxl.load_workbook('test.xlsx')
+    wb = openpyxl.load_workbook('temp.xlsx')
+    print("Building Spreadsheet")
     build_spreadsheet(wb)
+    print("Removing temp files")
+    os.remove('temp.xlsx')
 
     exit()
 
@@ -236,7 +253,7 @@ def build_spreadsheet(workbook):
         format_cell(ws, dest, src_cell=src, src_ws=data_ws, alignment=dac, bgcolor=dbm, font=ft)
         ws[dest].number_format = '0.00#'
 
-    wb.save('zhello.xlsx')
+    wb.save('TimeSheetReportCurrentYear.xlsx')
 
 
 def format_cell(ws, dest_cell, alignment=None, font=None, bgcolor=None, src_cell=None, src_ws=None, text=None,

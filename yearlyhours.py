@@ -38,13 +38,13 @@ print('Loaded: {:.0%}'.format(sheet_count / sheet_total))
 
 # create workbook that will be used in rest of program
 wb = openpyxl.Workbook()
-wb.remove_sheet(wb.active)  # remove initial sheet
+wb.remove(wb.active)  # remove initial sheet
 
 for sheet in mysheets:
     sheet_count += 1
     wb.create_sheet(sheet)
-    ws = wb.get_sheet_by_name(sheet)
-    wstemp = wbtemp.get_sheet_by_name(sheet)
+    ws = wb[sheet]
+    wstemp = wbtemp[sheet]
 
     # iterate through rows in temp sheet and copy the cells into the working sheet
     row_count = 1
