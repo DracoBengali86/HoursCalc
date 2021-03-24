@@ -4,7 +4,7 @@ import pandas as pd
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
 
 import openpyxl
@@ -48,8 +48,7 @@ def main():
         driver.get("https://apps.tricore.com/MobileTime/rep-timesheet")
 
     try:
-        element_present = EC.presence_of_element_located((By.ID, 'startDateInput'))
-        # element_present = EC.presence_of_element_located((By.XPATH, "//th[1]"))
+        element_present = ec.presence_of_element_located((By.ID, 'startDateInput'))
         WebDriverWait(driver, 3).until(element_present)
     except TimeoutException:
         print("Timed out waiting for page load")
@@ -71,19 +70,12 @@ def main():
 
     # try to wait for page load
     try:
-        # element_present = EC.presence_of_element_located((By.XPATH, "//th[2]"))
-        # WebDriverWait(driver, 10).until(element_present)
-        element = EC.text_to_be_present_in_element((By.XPATH, "//th[2]"), start_date)
+        element = ec.text_to_be_present_in_element((By.XPATH, "//th[2]"), start_date)
         WebDriverWait(driver, 10).until(element)
     except TimeoutException:
         print("Timed out waiting for page load")
         driver.quit()
         exit(21)
-
-    # element = driver.find_element_by_xpath("//th[2]")
-    # print("<element>")
-    # print(element.text)
-    # print("</element>")
 
     df = pd.read_html(driver.page_source)[0]
     print("Head\n")
@@ -110,8 +102,8 @@ def build_spreadsheet(workbook):
     ws = wb.active
     ws.title = "test"
 
-    projectcount = 0
-    hourscount = 0
+    project_count = 0
+    hours_count = 0
     single = 12.0
     double = 24.0
 
@@ -130,7 +122,6 @@ def build_spreadsheet(workbook):
     dbs = Side(style='medium', color='A9A9A9')
     dbn = Side(style='none')
 
-    # ws.sheet_format.defaultRowHeight = 24.0
     ws.sheet_format.defaultColWidth = 6.7109375
 
     ws.row_dimensions[1].height = single
@@ -148,7 +139,7 @@ def build_spreadsheet(workbook):
     ws['D2'].border = Border(top=dbs)
     ws['E2'].border = Border(top=dbs, right=dbs)
     ws['E3'].border = Border(right=dbs)
-    format_cell(ws, 'A2', src_cell='B2', src_ws=data_ws, alignment=dac, font=dfb, bgcolor=dbd)
+    format_cell(ws, 'A2', src_cell='B2', src_ws=data_ws, alignment=dac, font=dfb, bg_color=dbd)
     format_cell(ws, 'A4', text='Project', alignment=dac, font=df)
     format_cell(ws, 'B4', text='Project Name', alignment=dac, font=df)
     format_cell(ws, 'C4', text='Account', alignment=dac, font=df)
@@ -169,61 +160,63 @@ def build_spreadsheet(workbook):
             src = src_col[i]+str(taskrow)
             format_cell(ws, dest, src_cell=src, src_ws=data_ws, alignment=da, font=df, height=double)
             i += 1
-        projectcount += 1
+        project_count += 1
         taskrow += 1
 
-    row = 'E' + str(projectcount+5)
-    format_cell(ws, row, text='Totals:', alignment=dar, font=dfb, bgcolor=dbm, height=single)
+    row = 'E' + str(project_count+5)
+    format_cell(ws, row, text='Totals:', alignment=dar, font=dfb, bg_color=dbm, height=single)
 
-    hourcolumn = 7
-    hourrow = 1
+    hour_column = 7
+    hour_row = 1
     while True:
-        datecell = get_column_letter(hourcolumn) + str(hourrow)
-        daycell = get_column_letter(hourcolumn) + str(hourrow + 1)
-        hours = data_ws[datecell].value
+        date_cell = get_column_letter(hour_column) + str(hour_row)
+        day_cell = get_column_letter(hour_column) + str(hour_row + 1)
+        hours = data_ws[date_cell].value
         if hours is None:
             break
         # Date cell
-        dest = get_column_letter(hourcolumn - 1) + str(hourrow + 1)
-        merge = dest + ':' + get_column_letter(hourcolumn) + str(hourrow + 1)
+        dest = get_column_letter(hour_column - 1) + str(hour_row + 1)
+        merge = dest + ':' + get_column_letter(hour_column) + str(hour_row + 1)
         ws.merge_cells(merge)
-        format_cell(ws, dest, src_cell=datecell, src_ws=data_ws, alignment=dac, font=dfb, bgcolor=dbm)
+        format_cell(ws, dest, src_cell=date_cell, src_ws=data_ws, alignment=dac, font=dfb, bg_color=dbm)
         ws[dest].border = Border(top=dbs, bottom=dbn)
-        ws[get_column_letter(hourcolumn) + str(hourrow + 1)].border = Border(top=dbs, right=dbs)
+        ws[get_column_letter(hour_column) + str(hour_row + 1)].border = Border(top=dbs, right=dbs)
         ws[dest].number_format = 'DD/MM/YYYY'
+
         # Day of Week Cell
-        dest = get_column_letter(hourcolumn - 1) + str(hourrow + 2)
-        merge = dest + ':' + get_column_letter(hourcolumn) + str(hourrow + 2)
+        dest = get_column_letter(hour_column - 1) + str(hour_row + 2)
+        merge = dest + ':' + get_column_letter(hour_column) + str(hour_row + 2)
         ws.merge_cells(merge)
-        format_cell(ws, dest, src_cell=daycell, src_ws=data_ws, alignment=dac, font=dfb, bgcolor=dbm)
+        format_cell(ws, dest, src_cell=day_cell, src_ws=data_ws, alignment=dac, font=dfb, bg_color=dbm)
         ws[dest].border = Border(top=dbn)
-        ws[get_column_letter(hourcolumn) + str(hourrow + 2)].border = Border(right=dbs)
+        ws[get_column_letter(hour_column) + str(hour_row + 2)].border = Border(right=dbs)
+
         # Use/Chr cells
-        dest = get_column_letter(hourcolumn - 1) + str(hourrow + 3)
+        dest = get_column_letter(hour_column - 1) + str(hour_row + 3)
         format_cell(ws, dest, text="Use", alignment=dac, font=dfb)
-        dest = get_column_letter(hourcolumn) + str(hourrow + 3)
-        format_cell(ws, dest, text="Chg", alignment=dac, font=dfb, bgcolor=dbl)
+        dest = get_column_letter(hour_column) + str(hour_row + 3)
+        format_cell(ws, dest, text="Chg", alignment=dac, font=dfb, bg_color=dbl)
 
-        hourcolumn += 2
-        hourscount += 2
+        hour_column += 2
+        hours_count += 2
 
-    datedest = get_column_letter(hourscount + 4) + '2'
-    daydest = get_column_letter(hourscount + 4) + '3'
-    ws.unmerge_cells(datedest + ':' + get_column_letter(hourscount + 5) + '2')
-    ws.unmerge_cells(daydest + ':' + get_column_letter(hourscount + 5) + '3')
-    merge = datedest + ':' + get_column_letter(hourscount+5) + '3'
+    date_dest = get_column_letter(hours_count + 4) + '2'
+    day_dest = get_column_letter(hours_count + 4) + '3'
+    ws.unmerge_cells(date_dest + ':' + get_column_letter(hours_count + 5) + '2')
+    ws.unmerge_cells(day_dest + ':' + get_column_letter(hours_count + 5) + '3')
+    merge = date_dest + ':' + get_column_letter(hours_count+5) + '3'
     ws.merge_cells(merge)
-    ws.cell(row=2, column=hourscount + 5).border = Border(top=dbs, right=dbs)
-    ws.cell(row=3, column=hourscount + 5).border = Border(right=dbs, bottom=dbs)
-    ws.cell(row=3, column=hourscount + 4).border = Border(bottom=dbs)
-    format_cell(ws, datedest, text="Totals", alignment=atc, font=dfb, bgcolor=dbm)
-    dest = get_column_letter(hourscount + 4) + '4'
-    format_cell(ws, dest, text="Use", alignment=dac, font=dfb, bgcolor=dbm)
-    dest = get_column_letter(hourscount + 5) + '4'
-    format_cell(ws, dest, text="Chg", alignment=dac, font=dfb, bgcolor=dbm)
+    ws.cell(row=2, column=hours_count + 5).border = Border(top=dbs, right=dbs)
+    ws.cell(row=3, column=hours_count + 5).border = Border(right=dbs, bottom=dbs)
+    ws.cell(row=3, column=hours_count + 4).border = Border(bottom=dbs)
+    format_cell(ws, date_dest, text="Totals", alignment=atc, font=dfb, bg_color=dbm)
+    dest = get_column_letter(hours_count + 4) + '4'
+    format_cell(ws, dest, text="Use", alignment=dac, font=dfb, bg_color=dbm)
+    dest = get_column_letter(hours_count + 5) + '4'
+    format_cell(ws, dest, text="Chg", alignment=dac, font=dfb, bg_color=dbm)
 
-    for i in range(projectcount + 1):
-        if i == projectcount:
+    for i in range(project_count + 1):
+        if i == project_count:
             bgc1 = dbm
             bgc2 = dbm
             ft = dfb
@@ -231,40 +224,43 @@ def build_spreadsheet(workbook):
             bgc1 = None
             bgc2 = dbl
             ft = df
-        for j in range(0, hourscount - 2, 2):
+        for j in range(0, hours_count - 2, 2):
             # Use column
             dest = get_column_letter(j + 6) + str(i + 5)
             src = get_column_letter(j + 7) + str(i + 5)
-            format_cell(ws, dest, src_cell=src, src_ws=data_ws, alignment=dac, bgcolor=bgc1, font=ft)
+            format_cell(ws, dest, src_cell=src, src_ws=data_ws, alignment=dac, bg_color=bgc1, font=ft)
             ws[dest].number_format = '0.00#'
+
             # Chr column
             dest = get_column_letter(j + 7) + str(i + 5)
             src = get_column_letter(j + 8) + str(i + 5)
-            format_cell(ws, dest, src_cell=src, src_ws=data_ws, alignment=dac, bgcolor=bgc2, font=ft)
+            format_cell(ws, dest, src_cell=src, src_ws=data_ws, alignment=dac, bg_color=bgc2, font=ft)
             ws[dest].number_format = '0.00#'
+
         # Used column
-        dest = get_column_letter(hourscount + 4) + str(i + 5)
-        src = get_column_letter(hourscount + 5) + str(i + 5)
-        format_cell(ws, dest, src_cell=src, src_ws=data_ws, alignment=dac, bgcolor=dbm, font=ft)
+        dest = get_column_letter(hours_count + 4) + str(i + 5)
+        src = get_column_letter(hours_count + 5) + str(i + 5)
+        format_cell(ws, dest, src_cell=src, src_ws=data_ws, alignment=dac, bg_color=dbm, font=ft)
         ws[dest].number_format = '0.00#'
+
         # Charged column
-        dest = get_column_letter(hourscount + 5) + str(i + 5)
-        src = get_column_letter(hourscount + 6) + str(i + 5)
-        format_cell(ws, dest, src_cell=src, src_ws=data_ws, alignment=dac, bgcolor=dbm, font=ft)
+        dest = get_column_letter(hours_count + 5) + str(i + 5)
+        src = get_column_letter(hours_count + 6) + str(i + 5)
+        format_cell(ws, dest, src_cell=src, src_ws=data_ws, alignment=dac, bg_color=dbm, font=ft)
         ws[dest].number_format = '0.00#'
 
     wb.save('TimeSheetReportCurrentYear.xlsx')
 
 
-def format_cell(ws, dest_cell, alignment=None, font=None, bgcolor=None, src_cell=None, src_ws=None, text=None,
+def format_cell(ws, dest_cell, alignment=None, font=None, bg_color=None, src_cell=None, src_ws=None, text=None,
                 height=None):
     dbs = Side(style='medium', color='A9A9A9')
 
     if alignment is not None:
         ws[dest_cell].alignment = alignment
 
-    if bgcolor is not None:
-        ws[dest_cell].fill = bgcolor
+    if bg_color is not None:
+        ws[dest_cell].fill = bg_color
 
     if font is not None:
         ws[dest_cell].font = font
@@ -280,17 +276,5 @@ def format_cell(ws, dest_cell, alignment=None, font=None, bgcolor=None, src_cell
         ws.row_dimensions[ws[dest_cell].row].height = height
 
 
-# def modify_spreadsheet(workbook):
-#     ws = workbook.active
-#     # ws.insert_rows(1)
-#     ws.delete_cols(1)
-#     # ws.merge_cells('A2:E3')
-#
-#     workbook.save('ztest.xlsx')
-
-
 if __name__ == '__main__':
     main()
-    # modify_spreadsheet(wb)
-    # wb = openpyxl.load_workbook('test.xlsx')
-    # build_spreadsheet(wb)
