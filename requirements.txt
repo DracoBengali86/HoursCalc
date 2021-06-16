@@ -1,4 +1,4 @@
-urllib3==1.26.4
+urllib3==1.26.5
 selenium==3.141.0
 et-xmlfile==1.0.1
 jdcal==1.4.1
