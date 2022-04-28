@@ -1,5 +1,6 @@
 Comp. Time
 Flex Time
+Floating Holiday
 Funeral
 Holiday
 Short Term Disability
