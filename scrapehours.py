@@ -49,7 +49,7 @@ def main():
 
     try:
         element_present = ec.presence_of_element_located((By.ID, 'startDateInput'))
-        WebDriverWait(driver, 3).until(element_present)
+        WebDriverWait(driver, 10).until(element_present)
     except TimeoutException:
         print("Timed out waiting for page load")
         driver.quit()

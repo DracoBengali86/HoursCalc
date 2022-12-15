@@ -279,6 +279,8 @@ while rerun != "N":
                 myyearlypay[i] = int(input('How much were you paid in \'' + myyears[i] + '? $').replace(',', ''))
             break
 
+    print('\nUsing File: ' + file_name)
+
     adjustedtotalhours = 0
     adjustedignoredhours = 0
     for i in range(len(myyears)):

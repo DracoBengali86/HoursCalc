@@ -1,4 +1,8 @@
 Comp. Time
+COVID-19 Child Care
+COVID-19 Individual Care
+COVID-19 Quarantined
+COVID-19 Symptomatic
 Flex Time
 Floating Holiday
 Funeral
