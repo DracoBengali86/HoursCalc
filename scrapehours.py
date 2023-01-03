@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import time
 
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
@@ -11,7 +12,7 @@ import openpyxl
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 # TODO: Create function to create string from datetime in d/m/yy with no zero padding
 # TODO: Create function to find previous Sunday and return formatted date string (possibly make selectable day)
@@ -19,11 +20,22 @@ today = datetime.now()
 year = str(today.year)
 offset = today.isoweekday()
 sunday = today - timedelta(days=offset)
+new_year_test = date(int(year), 1, 15)
+is_new_year = False
+
+if today.date() < new_year_test:
+    print("Start of New Year")
+    is_new_year = True
+    year = str(int(year)-1)
 
 # Start date must be formatted d/m/yy, not dd/mm/yyyy it is used to compare to the date on the spreadsheet
 # and that date has no zero padding and only a two digit year. End date only has to exclude time info (no HH:MM:SS.SS)
 start_date = '1/1/' + year[-2:]
-end_date = sunday.strftime("%m/%d/%y")
+
+if is_new_year:
+    end_date = '12/31/' + year[-2:]
+else:
+    end_date = sunday.strftime("%m/%d/%y")
 
 key_control = u'\ue009'
 key_backspace = u'\ue003'
@@ -55,6 +67,7 @@ def main():
         driver.quit()
         exit(20)
 
+    time.sleep(2)
     start_element = driver.find_element_by_id("startDateInput")
     end_element = driver.find_element_by_id("endDateInput")
     # clear End Date field
