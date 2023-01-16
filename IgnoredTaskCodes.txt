@@ -7,6 +7,7 @@ Flex Time
 Floating Holiday
 Funeral
 Holiday
+Paid Time Off
 Short Term Disability
 Sick Time
 Snow Day
