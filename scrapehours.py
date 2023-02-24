@@ -68,8 +68,8 @@ def main():
         exit(20)
 
     time.sleep(2)
-    start_element = driver.find_element_by_id("startDateInput")
-    end_element = driver.find_element_by_id("endDateInput")
+    start_element = driver.find_element("id", "startDateInput")
+    end_element = driver.find_element("id", "endDateInput")
     # clear End Date field
     end_element.send_keys(u'\ue009' + "a" + u'\ue003')
     # enter new end date
